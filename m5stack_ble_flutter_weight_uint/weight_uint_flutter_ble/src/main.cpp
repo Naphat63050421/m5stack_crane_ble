@@ -125,9 +125,9 @@ void setup()
 void loop()
 {
   M5.update();
-  float sum_weight = 0.0;
-  float weight = 0.0;
-  float reading_averg[readingsToAverage];
+  double sum_weight = 0.0f;
+  double weight;
+  double reading_averg[readingsToAverage];
   canvas.fillSprite(BLACK);                                                // back ground สีดำ
   canvas.setTextSize(1);                                                   // text size 1
   canvas.drawString("Connect the Weight Unit to PortB(G33,G32)", 160, 40); // text
@@ -156,12 +156,10 @@ void loop()
     }
     canvas.drawString("Weight " + String(sum_weight) + "Kg", 160, 150);
     canvas.pushSprite(0, 0);
-
-    double datatest = 12.0f; //test data
     if (deviceConnected)
     {
-      pTxCharacteristic->setValue(datatest); //test send data to APPICATION
-      Serial.println(datatest); // debug data
+      String stringValue = String(sum_weight); // cast type data
+      pTxCharacteristic->setValue(stringValue.c_str()); //ส่ง Data
       pTxCharacteristic->notify();
       txValue++;
       delay(10); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
@@ -187,8 +185,8 @@ void loop()
   canvas.drawString(">>Intput Weight<<", 160, 150); // text
   // Serial.println(weight); // text
   canvas.pushSprite(0, 0); // pushSprite ออกหน้าจอ
-  // Serial.print("raw_weight: ");
-  // Serial.println(weight);
-  // Serial.print("Pull_weight: ");
-  // Serial.println(sum_weight);
+  Serial.print("raw_weight: ");
+  Serial.println(weight);
+  Serial.print("Pull_weight: ");
+  Serial.println(sum_weight);
 }
