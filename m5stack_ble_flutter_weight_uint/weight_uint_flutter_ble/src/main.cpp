@@ -128,65 +128,65 @@ void loop()
   double sum_weight = 0.0f;
   double weight;
   double reading_averg[readingsToAverage];
-  canvas.fillSprite(BLACK);                                                // back ground สีดำ
-  canvas.setTextSize(1);                                                   // text size 1
-  canvas.drawString("Connect the Weight Unit to PortB(G33,G32)", 160, 40); // text
-  canvas.drawString("Click Btn A for Calibration", 160, 80);               // text
-
+  canvas.fillSprite(BLACK);                                                
+  canvas.setTextSize(1);                                                   
+  canvas.drawString("Connect the Weight Unit to PortB(G33,G32)", 160, 40); 
+  canvas.drawString("Click Btn A for Calibration", 160, 80);               
   weight = scale.get_units();
   weight = weight / 1000;
-  // เมื่อมีค่าน้ำหนักจะเริ่มการคำนวน
-  if (weight > 0.50) // +- load cell เวลาขยับอาจจะเกิดค่าน้ำหนักทำให้เกิดการคำนวนได้
-  {
+  if (weight > 0.40) {
     canvas.setTextSize(3);
-    canvas.drawString("Calculated..", 160, 150);
-    // ตอนคำนวนอาจจะมีstatusบอกว่าอีกกี่วินาทีจะได้น้ำหนักตอนคำนวน (แต่ยังไม่ได้ทำ)
+    canvas.drawString("Wait...", 160, 150);  
     canvas.pushSprite(0, 0);
-    for (int i = 0; i < readingsToAverage; i++) // for loop คำนวนค่าน้ำหนัก AVERG  70 ตัว loop time เวลาประมาณ 5 วินาที ของ 70 ตัว
-                                                //(แต่จะเปลี่ยนเป็น Timer function "millis()" จับเวลาแทน)
-    {
-      reading_averg[i] = scale.get_units();
-      sum_weight += reading_averg[i];
-    }
-    sum_weight = sum_weight / readingsToAverage; // คำนวน Averange
-    sum_weight = sum_weight / 1000;              // แปลงหน่วย
-    if (sum_weight < 0.00)                       // เผื่อถ้าค่าข้อมูลติดลบตอนยังไม่เจอน้ำหนักจะให้ Fillค่า 0.0 kg เอาไว้ (อาจจะไม่มีก็ได้)
-    {
-      sum_weight = 0.00;
-    }
-    canvas.drawString("Weight " + String(sum_weight) + "Kg", 160, 150);
-    canvas.pushSprite(0, 0);
-    if (deviceConnected)
-    {
-      String stringValue = String(sum_weight); // cast type data
-      pTxCharacteristic->setValue(stringValue.c_str()); //ส่ง Data
-      pTxCharacteristic->notify();
-      txValue++;
-      delay(10); // bluetooth stack will go into congestion, if too many packets are sent, in 6 hours test i was able to go as low as 3ms
-    }
-    // disconnecting
-    if (!deviceConnected && oldDeviceConnected)
-    {
-      delay(500);                  // give the bluetooth stack the chance to get things ready
-      pServer->startAdvertising(); // restart advertising
-      Serial.println("start advertising");
-      oldDeviceConnected = deviceConnected;
-    }
-    // connecting
-    if (deviceConnected && !oldDeviceConnected)
-    {
-      // do stuff here on connecting
-      oldDeviceConnected = deviceConnected;
-    }
-
-    delay(5000); // ให้ดูผลการชั่งน้ำหนัก 5 วินาที
+    delay(1000);
+    weight = scale.get_units();
+    weight = weight / 1000;
   }
+  Serial.println(weight);
+    if (weight > 0.40) 
+    {
+      canvas.setTextSize(3);
+      canvas.drawString("Calculating..", 160, 150);
+      canvas.pushSprite(0, 0);
+      for (int i = 0; i < readingsToAverage; i++) 
+      {
+        reading_averg[i] = scale.get_units();
+        sum_weight += reading_averg[i];
+      }
+      sum_weight = sum_weight / readingsToAverage; 
+      sum_weight = sum_weight / 1000;              
+      if (sum_weight < 0.00)                       
+      {
+        sum_weight = 0.00;
+      }
+      canvas.drawString("Weight " + String(sum_weight) + "Kg", 160, 150);
+      canvas.pushSprite(0, 0);
+      if (deviceConnected)
+      {
+        String stringValue = String(sum_weight);
+        pTxCharacteristic->setValue(stringValue.c_str());
+        pTxCharacteristic->notify();
+        txValue++;
+        delay(10); 
+      }
+      // disconnecting
+      if (!deviceConnected && oldDeviceConnected)
+      {
+        delay(500);                  
+        pServer->startAdvertising(); 
+        Serial.println("start advertising");
+        oldDeviceConnected = deviceConnected;
+      }
+      // connecting
+      if (deviceConnected && !oldDeviceConnected)
+      {
+        // do stuff here on connecting
+        oldDeviceConnected = deviceConnected;
+      }
+
+      delay(5000); // ให้ดูผลการชั่งน้ำหนัก 5 วินาที
+    }
   canvas.setTextSize(3);                            // config text size
   canvas.drawString(">>Intput Weight<<", 160, 150); // text
-  // Serial.println(weight); // text
   canvas.pushSprite(0, 0); // pushSprite ออกหน้าจอ
-  Serial.print("raw_weight: ");
-  Serial.println(weight);
-  Serial.print("Pull_weight: ");
-  Serial.println(sum_weight);
 }
